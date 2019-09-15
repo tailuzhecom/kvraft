@@ -15,7 +15,7 @@ func (mr *Master) merge() {
 	debug("Merge phase")
 	kvs := make(map[string]string)
 	for i := 0; i < mr.nReduce; i++ {
-		p := mergeName(mr.jobName, i)
+		p := mergeName(mr.jobName, i)	// reduce阶段的生成文件
 		fmt.Printf("Merge: read %s\n", p)
 		file, err := os.Open(p)
 		if err != nil {
@@ -39,7 +39,7 @@ func (mr *Master) merge() {
 	sort.Strings(keys)
 	log.Println("merge()", kvs)
 
-	file, err := os.Create("mrtmp." + mr.jobName)  // filename: mrtmp.test
+	file, err := os.Create("mrtmp." + mr.jobName)  // 最终的输出文件: mrtmp.test
 	if err != nil {
 		log.Fatal("Merge: create ", err)
 	}

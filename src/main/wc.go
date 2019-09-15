@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"mapreduce"
 	"os"
+	"strconv"
+	"strings"
 )
 
 //
@@ -15,6 +18,13 @@ import (
 //
 func mapF(filename string, contents string) []mapreduce.KeyValue {
 	// Your code here (Part II).
+	var res []mapreduce.KeyValue
+	words := strings.Fields(contents)	//返回由空格分割的字符串
+	for _, w := range words {
+		kv := mapreduce.KeyValue{w, "1"}
+		res = append(res, kv)
+	}
+	return res
 }
 
 //
@@ -24,6 +34,15 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 //
 func reduceF(key string, values []string) string {
 	// Your code here (Part II).
+	res := 0
+	for _, e := range values {
+		val, err := strconv.Atoi(e)
+		if err != nil {
+			log.Println(err)
+		}
+		res += val
+	}
+	return strconv.Itoa(res)
 }
 
 // Can be run in 3 ways:
