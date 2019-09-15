@@ -25,7 +25,7 @@ const (
 // Split in words
 func MapFunc(file string, value string) (res []KeyValue) {
 	debug("Map %v\n", value)
-	words := strings.Fields(value)
+	words := strings.Fields(value)	//返回由空格分割的字符串
 	for _, w := range words {
 		kv := KeyValue{w, ""}
 		res = append(res, kv)
@@ -50,6 +50,7 @@ func check(t *testing.T, files []string) {
 	}
 	defer output.Close()
 
+
 	var lines []string
 	for _, f := range files {
 		input, err := os.Open(f)
@@ -64,7 +65,7 @@ func check(t *testing.T, files []string) {
 	}
 
 	sort.Strings(lines)
-
+	log.Println("lines:", len(lines))
 	outputScanner := bufio.NewScanner(output)
 	i := 0
 	for outputScanner.Scan() {
@@ -80,6 +81,7 @@ func check(t *testing.T, files []string) {
 		}
 		i++
 	}
+	log.Println("mrtmp.test line number : ", i)
 	if i != nNumber {
 		t.Fatalf("Expected %d lines in output\n", nNumber)
 	}

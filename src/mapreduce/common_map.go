@@ -1,7 +1,12 @@
 package mapreduce
 
 import (
+	"encoding/json"
+	"fmt"
 	"hash/fnv"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 func doMap(
@@ -53,6 +58,33 @@ func doMap(
 	//
 	// Your code here (Part I).
 	//
+	file_content_byte, err := ioutil.ReadFile(inFile)
+	if err != nil {
+		log.Println(err)
+		return
+	} else {
+		file_content_str := string(file_content_byte)	// 获取content
+		mapF_output := mapF(inFile, file_content_str)	// 使用Map函数
+		partition_map := make(map[int][]KeyValue)
+		for _, item := range mapF_output {
+			hash_val := ihash(item.Key) % nReduce	// 计算key的hash value
+			partition_map[hash_val] = append(partition_map[hash_val], item)
+		}
+		// 将map持久化到文件中
+		for file_idx, json_str := range partition_map {
+			file, e := os.Create(reduceName(jobName, mapTask, file_idx))	// 构造临时文件
+			if e != nil {
+				fmt.Println(e)
+			}
+
+			encoder := json.NewEncoder(file)
+			encode := encoder.Encode(json_str)
+			if encode != nil {
+				fmt.Println(encode)
+			}
+			file.Close()
+		}
+	}
 }
 
 func ihash(s string) int {

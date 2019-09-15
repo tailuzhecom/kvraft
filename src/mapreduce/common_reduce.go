@@ -1,5 +1,12 @@
 package mapreduce
 
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+)
+
 func doReduce(
 	jobName string, // the name of the whole MapReduce job
 	reduceTask int, // which reduce task this is
@@ -44,4 +51,47 @@ func doReduce(
 	//
 	// Your code here (Part I).
 	//
+
+	reduce_map := make(map[string][]string)
+	// sort，每个key，对应一个[]string，然后将每个key和对应的value传递给reduce处理
+	for i := 0; i < nMap; i++ {
+		tmp_file_name := reduceName(jobName, i, reduceTask)	// 收集每一个maptask产生的对应reduceTask的结果
+		tmp_file, e := os.Open(tmp_file_name)
+		if e != nil {
+			fmt.Println(e)
+		}
+
+		decoder := json.NewDecoder(tmp_file)
+		var kvs []KeyValue
+		decode := decoder.Decode(&kvs)
+		if decode != nil {
+			fmt.Println("get json error")
+		}
+		tmp_file.Close()
+		for _, kv := range kvs {
+			reduce_map[kv.Key] = append(reduce_map[kv.Key], kv.Value)
+		}
+	}
+
+	// 一个reduceTask可能要处理多个key,对reduce task中的每一个key进行处理
+	reduce_file, e := os.Create(mergeName(jobName, reduceTask))  // mrtmp.test-res-n
+	defer reduce_file.Close()
+	for k, v := range reduce_map {
+		reduce_res := reduceF(k, v)
+
+		if e != nil {
+			fmt.Println(e)
+		}
+		encoder := json.NewEncoder(reduce_file)
+		kv := KeyValue{k, reduce_res}
+
+		encode := encoder.Encode(kv)
+		if encode != nil {
+			fmt.Println(encode)
+		}
+		log.Println("do_reduce()", reduce_res)
+	}
+
+
+
 }

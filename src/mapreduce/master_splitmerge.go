@@ -37,8 +37,9 @@ func (mr *Master) merge() {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+	log.Println("merge()", kvs)
 
-	file, err := os.Create("mrtmp." + mr.jobName)
+	file, err := os.Create("mrtmp." + mr.jobName)  // filename: mrtmp.test
 	if err != nil {
 		log.Fatal("Merge: create ", err)
 	}
